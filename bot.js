@@ -4,9 +4,14 @@ var T = new Twit(require('./config.js'));
 
 var debug = true; // if you don't want to post to Twitter, useful for debugging
 
-var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
-var patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
-var corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
+// var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
+// var patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
+// var corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
+
+var capitalismSearch;
+var patriotismSearch;
+var corruptSearch;
+
 
 
 // Stream - Replies to users who tweet @ me
@@ -37,22 +42,34 @@ streamReply.on('tweet', function (tweet) {
 	}
 })
 
-// Steam - Replies to users based on search
-// var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
-// streamCap.on('tweet', function (tweet) {
-// 	console.log("Found a tweet!")
-//   	var nameID = tweet.id_str;
-// 	var name = '@' + tweet.user.screen_name;
-// 	console.log(name);
 
-// 	var respondText = "10 points have been deducted for INNAPRORIATE TOPIC. Please check the website for current points / privileges.";
 
-// 	if (debug) {
-// 		console.log(tweet.text);
-// 	} else {
-// 		respond(respondText, name, nameID);
-// 	}
-// })
+// Stream - Set current choice to a variable, to be used later
+var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
+streamCap.on('tweet', function (tweet) {
+	capitalismSearch = tweet;
+
+		console.log("capitalismSearch");
+	respondLatest(capitalismSearch);
+})
+// Stream - Set current choice to a variable, to be used later
+var streamPat = T.stream('statuses/filter', {track: 'democracy'});
+streamPat.on('tweet', function (tweet) {
+	patriotismSearch = tweet;
+
+		console.log("patriotismSearch");
+	respondLatest(patriotismSearch);
+})
+// Stream - Set current choice to a variable, to be used later
+var streamCor = T.stream('statuses/filter', {track: '#corrupt'});
+streamCor.on('tweet', function (tweet) {
+	corruptSearch = tweet;
+		
+		console.log("corruptSearch");
+	respondLatest(corruptSearch);
+})
+
+
 
 
 // Helper function for responding based on some criteria
@@ -70,48 +87,86 @@ function respond(data, name, nameID) {
 
 
 
-// Finds the latest tweet with the hashtag, and responds
-function respondLatest() {
+
+// Responds when called by stream
+function respondLatest(chosenSearch) {
 	//Partial responses to people, telling them why they lost points
 	var respondText1 = "10 points have been deducted for ";
 	var respondText2 = ". Please check the website for current points / privileges.";
 		
 	var reason = "INNAPRORIATE TOPIC";
-		
-	//Choose a hashtag to search randomly, for variety
-	var chosenSearch;
-	var rand = Math.random();
 
-	if(rand >= .60) {
-		var chosenSearch = capitalismSearch;
-	} else if (rand <= 0.60 && rand >= .40) {
-		var chosenSearch = patriotismSearch;
+
+  	console.log("Found a tweet! = " + chosenSearch.text);
+  	console.log("LOCATION = " + chosenSearch.user.location);
+
+  	var nameID = chosenSearch.id_str;
+	var name = '@' + chosenSearch.user.screen_name;
+	console.log(name);
+
+	if (debug) {
+		// console.log("Found a tweet! = " + data.statuses[0].text);
 	} else {
-		var chosenSearch = corruptSearch;
+		// Respond to their tweet
+		respond(respondText1 + reason + respondText2, name, nameID);
 	}
 
-
-	T.get('search/tweets', chosenSearch, function (error, data) {
-	  // If the search request to the server had no errors...
-	  if (!error) {
-
-	  	console.log("Found a tweet! = " + data.statuses[0].text);
-	  	var nameID = data.statuses[0].id_str;
-		var name = '@' + data.statuses[0].user.screen_name;
-		console.log(name);
-
-		if (debug) {
-			// console.log("Found a tweet! = " + data.statuses[0].text);
-		} else {
-			// Respond to their tweet
-			respond(respondText1 + reason + respondText2, name, nameID);
-		}
-
-	  } else {
-	  	console.log('There was an error with your hashtag search:', error);
-	  }
-	});
 }
+
+
+
+
+// Finds the latest tweet with the hashtag, and responds
+// function respondLatest() {
+// 	//Partial responses to people, telling them why they lost points
+// 	var respondText1 = "10 points have been deducted for ";
+// 	var respondText2 = ". Please check the website for current points / privileges.";
+		
+// 	var reason = "INNAPRORIATE TOPIC";
+		
+// 	//Choose a hashtag to search randomly, for variety
+// 	var chosenSearch;
+// 	var rand = Math.random();
+
+// 	if(rand >= .60) {
+// 		var chosenSearch = capitalismSearch;
+// 		console.log("Chose capitalismSearch");
+// 		console.log(capitalismSearch);
+
+// 	} else if (rand <= 0.60 && rand >= .40) {
+// 		var chosenSearch = patriotismSearch;
+// 		console.log("Chose patriotismSearch");
+// 		console.log(patriotismSearch);
+// 	} else {
+// 		var chosenSearch = corruptSearch;
+// 		console.log("Chose corruptSearch");
+// 		console.log(corruptSearch);
+// 	}
+
+
+// 	T.get('search/tweets', chosenSearch, function (error, data) {
+// 	  // If the search request to the server had no errors...
+// 	  if (!error && (data.statuses[0] != undefined) ) {
+
+// 	  	console.log("Found a tweet! = " + data.statuses[0].text);
+// 	  	console.log("LOCATION = " + data.statuses[0].user.location);
+
+// 	  	var nameID = data.statuses[0].id_str;
+// 		var name = '@' + data.statuses[0].user.screen_name;
+// 		console.log(name);
+
+// 		if (debug) {
+// 			// console.log("Found a tweet! = " + data.statuses[0].text);
+// 		} else {
+// 			// Respond to their tweet
+// 			respond(respondText1 + reason + respondText2, name, nameID);
+// 		}
+
+// 	  } else {
+// 	  	console.log('There was an error with your hashtag search:', error);
+// 	  }
+// 	});
+// }
 
 
 
@@ -203,10 +258,17 @@ function tweet() {
 
 
 function runBot() {
+
+	// Refresh hashtag searches to keep them recent
+	// capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
+	// patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
+	// corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
+
+
 	var rand = Math.random();
 
 	console.log(rand);
-	respondLatest();
+	//respondLatest();
 
 
 	// if(rand >= .60) {
