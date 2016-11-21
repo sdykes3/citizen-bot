@@ -45,27 +45,27 @@ streamReply.on('tweet', function (tweet) {
 
 
 // Stream - Set current choice to a variable, to be used later
-var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
+var streamCap = T.stream('statuses/filter', {track: 'hate capitalism, capitalism'});
 streamCap.on('tweet', function (tweet) {
 	capitalismSearch = tweet;
+	console.log("capitalismSearch");
 
-		console.log("capitalismSearch");
 	respondLatest(capitalismSearch);
 })
 // Stream - Set current choice to a variable, to be used later
-var streamPat = T.stream('statuses/filter', {track: 'democracy'});
+var streamPat = T.stream('statuses/filter', {track: 'hate democracy, democracy'});
 streamPat.on('tweet', function (tweet) {
 	patriotismSearch = tweet;
+	console.log("patriotismSearch");
 
-		console.log("patriotismSearch");
 	respondLatest(patriotismSearch);
 })
 // Stream - Set current choice to a variable, to be used later
 var streamCor = T.stream('statuses/filter', {track: '#corrupt'});
 streamCor.on('tweet', function (tweet) {
 	corruptSearch = tweet;
-		
-		console.log("corruptSearch");
+	console.log("corruptSearch");
+
 	respondLatest(corruptSearch);
 })
 
@@ -87,18 +87,37 @@ function respond(data, name, nameID) {
 
 
 
-
 // Responds when called by stream
 function respondLatest(chosenSearch) {
-	//Partial responses to people, telling them why they lost points
-	var respondText1 = "10 points have been deducted for ";
+	// Partial responses to people, telling them why they lost points
+	var respondText1 = "ATTENTION: 10 points have been deducted for ";
 	var respondText2 = ". Please check the website for current points / privileges.";
 		
-	var reason = "INNAPRORIATE TOPIC";
+	// Choose a specific reason to deduct points	
+	var reason;
+	var rand = Math.random();
+
+	//Doing a regex match here.
+  	var regexp_retweet = new RegExp('^RT *','g');
+
+  	if(chosenSearch.text.match(regexp_retweet)) {
+  		var reason = "PROMOTING FALSE CRITISISM";
+  		console.log("RETWEETED!!!!!!!");
+  	} else if(rand >= .60) {
+		var reason = "INNAPRORIATE TOPIC";
+	} else if (rand <= 0.60 && rand >= .40) {
+		var reason = "UNPATRIOTIC CONDUCT";
+	} else {
+		var reason = "DISTRUPTION OF PEACE";
+	}
+	// CONSPIRACY, DISORDERLY CONDUCT, DISRUPTION OF PEACE
 
 
   	console.log("Found a tweet! = " + chosenSearch.text);
-  	console.log("LOCATION = " + chosenSearch.user.location);
+  	// Limit only to United States?
+  	if(chosenSearch.user.location != null) {
+		console.log("LOCATION = " + chosenSearch.user.location);
+  	}
 
   	var nameID = chosenSearch.id_str;
 	var name = '@' + chosenSearch.user.screen_name;
@@ -197,7 +216,6 @@ function retweetLatest() {
 	  }
 	});
 }
-
 
 
 // Tweet regular statuses with no user engagement
