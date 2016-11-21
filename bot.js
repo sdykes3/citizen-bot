@@ -4,13 +4,12 @@ var T = new Twit(require('./config.js'));
 
 var debug = true; // if you don't want to post to Twitter, useful for debugging
 
-var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"}; 
+var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
+var patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
+var corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
 
-//capitalism
-//patriotism
 
-
-// Replies to users who tweet @ me
+// Stream - Replies to users who tweet @ me
 var streamReply = T.stream('statuses/filter', {track: '@testingBot9'});
 streamReply.on('tweet', function (tweet) {
 	console.log("Got a tweet at me!")
@@ -38,7 +37,7 @@ streamReply.on('tweet', function (tweet) {
 	}
 })
 
-// Replies to users based on search
+// Steam - Replies to users based on search
 // var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
 // streamCap.on('tweet', function (tweet) {
 // 	console.log("Found a tweet!")
@@ -54,6 +53,7 @@ streamReply.on('tweet', function (tweet) {
 // 		respond(respondText, name, nameID);
 // 	}
 // })
+
 
 // Helper function for responding based on some criteria
 function respond(data, name, nameID) {
@@ -72,31 +72,40 @@ function respond(data, name, nameID) {
 
 // Finds the latest tweet with the hashtag, and responds
 function respondLatest() {
+	//Partial responses to people, telling them why they lost points
+	var respondText1 = "10 points have been deducted for ";
+	var respondText2 = ". Please check the website for current points / privileges.";
+		
+	var reason = "INNAPRORIATE TOPIC";
+		
+	//Choose a hashtag to search randomly, for variety
 	var chosenSearch;
+	var rand = Math.random();
+
+	if(rand >= .60) {
+		var chosenSearch = capitalismSearch;
+	} else if (rand <= 0.60 && rand >= .40) {
+		var chosenSearch = patriotismSearch;
+	} else {
+		var chosenSearch = corruptSearch;
+	}
 
 
 	T.get('search/tweets', chosenSearch, function (error, data) {
 	  // If the search request to the server had no errors...
-	   console.log(data);
 	  if (!error) {
 
-	  	
-
-	  	console.log("Found a tweet!")
+	  	console.log("Found a tweet! = " + data.statuses[0].text);
 	  	var nameID = data.statuses[0].id_str;
 		var name = '@' + data.statuses[0].user.screen_name;
 		console.log(name);
 
-		var respondText = "10 points have been deducted for INNAPRORIATE TOPIC. Please check the website for current points / privileges.";
-
 		if (debug) {
-			console.log(tweet.text);
+			// console.log("Found a tweet! = " + data.statuses[0].text);
 		} else {
 			// Respond to their tweet
-			respond(respondText, name, nameID);
+			respond(respondText1 + reason + respondText2, name, nameID);
 		}
-
-
 
 	  } else {
 	  	console.log('There was an error with your hashtag search:', error);
@@ -199,7 +208,6 @@ function runBot() {
 	console.log(rand);
 	respondLatest();
 
-	// tweet();
 
 	// if(rand >= .60) {
 	// 	console.log("-------Tweet something");
