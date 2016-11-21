@@ -4,8 +4,10 @@ var T = new Twit(require('./config.js'));
 
 var debug = true; // if you don't want to post to Twitter, useful for debugging
 
-var capitalismSearch = {q: "#capitalism", count: 10, result_type: "recent"}; 
+var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"}; 
 
+//capitalism
+//patriotism
 
 
 // Replies to users who tweet @ me
@@ -26,27 +28,32 @@ streamReply.on('tweet', function (tweet) {
 		}
 	});
 
+	var respondText = "We hear your concerns. Please check the website for details about your point deductions and privileges.";
+
 	if (debug) {
 		console.log(tweet.text);
 	} else {
-		respond("Hello", name, nameID);
+		// Respond to mention
+		respond(respondText, name, nameID);
 	}
 })
 
 // Replies to users based on search
-var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
-streamCap.on('tweet', function (tweet) {
-	console.log("Found a tweet!")
-  	var nameID = tweet.id_str;
-	var name = '@' + tweet.user.screen_name;
-	console.log(name);
+// var streamCap = T.stream('statuses/filter', {track: 'capitalism'});
+// streamCap.on('tweet', function (tweet) {
+// 	console.log("Found a tweet!")
+//   	var nameID = tweet.id_str;
+// 	var name = '@' + tweet.user.screen_name;
+// 	console.log(name);
 
-	if (debug) {
-		console.log(tweet.text);
-	} else {
-		respond("hi", name, nameID);
-	}
-})
+// 	var respondText = "10 points have been deducted for INNAPRORIATE TOPIC. Please check the website for current points / privileges.";
+
+// 	if (debug) {
+// 		console.log(tweet.text);
+// 	} else {
+// 		respond(respondText, name, nameID);
+// 	}
+// })
 
 // Helper function for responding based on some criteria
 function respond(data, name, nameID) {
@@ -59,6 +66,44 @@ function respond(data, name, nameID) {
 		}
 	})
 }
+
+
+
+
+// Finds the latest tweet with the hashtag, and responds
+function respondLatest() {
+	var chosenSearch;
+
+
+	T.get('search/tweets', chosenSearch, function (error, data) {
+	  // If the search request to the server had no errors...
+	   console.log(data);
+	  if (!error) {
+
+	  	
+
+	  	console.log("Found a tweet!")
+	  	var nameID = data.statuses[0].id_str;
+		var name = '@' + data.statuses[0].user.screen_name;
+		console.log(name);
+
+		var respondText = "10 points have been deducted for INNAPRORIATE TOPIC. Please check the website for current points / privileges.";
+
+		if (debug) {
+			console.log(tweet.text);
+		} else {
+			// Respond to their tweet
+			respond(respondText, name, nameID);
+		}
+
+
+
+	  } else {
+	  	console.log('There was an error with your hashtag search:', error);
+	  }
+	});
+}
+
 
 
 
@@ -152,6 +197,7 @@ function runBot() {
 	var rand = Math.random();
 
 	console.log(rand);
+	respondLatest();
 
 	// tweet();
 
