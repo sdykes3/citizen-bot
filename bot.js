@@ -2,7 +2,7 @@
 var Twit = require('twit');
 var T = new Twit(require('./config.js'));
 
-var debug = true; // if you don't want to post to Twitter, useful for debugging
+var debug = false; // if you don't want to post to Twitter, useful for debugging
 
 // var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
 // var patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
@@ -71,7 +71,6 @@ streamCor.on('tweet', function (tweet) {
 
 
 
-
 // Helper function for responding based on some criteria
 function respond(data, name, nameID) {
 	T.post('statuses/update', {in_reply_to_status_id: nameID, status: name + " " + data}, function(err, data, response) {
@@ -79,19 +78,17 @@ function respond(data, name, nameID) {
 			console.log('Success! The bot has responded to someone.')
 		}
 		if (err) {
-			console.log('There was an error with Twitter:', error);
+			console.log('There was an error with Twitter:', err);
 		}
 	})
 }
 
 
-
-
 // Responds when called by stream
 function respondLatest(chosenSearch) {
 	// Partial responses to people, telling them why they lost points
-	var respondText1 = "ATTENTION: 10 points have been deducted for ";
-	var respondText2 = ". Please check the website for current points / privileges.";
+	var respondText1 = "ATTENTION: You have lost 10 points for ";
+	var respondText2 = ". Please check the website for current status / privileges.";
 		
 	// Choose a specific reason to deduct points	
 	var reason;
@@ -104,7 +101,7 @@ function respondLatest(chosenSearch) {
   		var reason = "PROMOTING FALSE CRITISISM";
   		console.log("RETWEETED!!!!!!!");
   	} else if(rand >= .60) {
-		var reason = "INNAPRORIATE TOPIC";
+		var reason = "FALSE CRITISISM";
 	} else if (rand <= 0.60 && rand >= .40) {
 		var reason = "UNPATRIOTIC CONDUCT";
 	} else {
@@ -127,6 +124,7 @@ function respondLatest(chosenSearch) {
 		// console.log("Found a tweet! = " + data.statuses[0].text);
 	} else {
 		// Respond to their tweet
+		console.log(respondText1 + reason + respondText2);
 		respond(respondText1 + reason + respondText2, name, nameID);
 	}
 
@@ -135,71 +133,29 @@ function respondLatest(chosenSearch) {
 
 
 
-// Finds the latest tweet with the hashtag, and responds
-// function respondLatest() {
-// 	//Partial responses to people, telling them why they lost points
-// 	var respondText1 = "10 points have been deducted for ";
-// 	var respondText2 = ". Please check the website for current points / privileges.";
-		
-// 	var reason = "INNAPRORIATE TOPIC";
-		
-// 	//Choose a hashtag to search randomly, for variety
-// 	var chosenSearch;
-// 	var rand = Math.random();
-
-// 	if(rand >= .60) {
-// 		var chosenSearch = capitalismSearch;
-// 		console.log("Chose capitalismSearch");
-// 		console.log(capitalismSearch);
-
-// 	} else if (rand <= 0.60 && rand >= .40) {
-// 		var chosenSearch = patriotismSearch;
-// 		console.log("Chose patriotismSearch");
-// 		console.log(patriotismSearch);
-// 	} else {
-// 		var chosenSearch = corruptSearch;
-// 		console.log("Chose corruptSearch");
-// 		console.log(corruptSearch);
-// 	}
-
-
-// 	T.get('search/tweets', chosenSearch, function (error, data) {
-// 	  // If the search request to the server had no errors...
-// 	  if (!error && (data.statuses[0] != undefined) ) {
-
-// 	  	console.log("Found a tweet! = " + data.statuses[0].text);
-// 	  	console.log("LOCATION = " + data.statuses[0].user.location);
-
-// 	  	var nameID = data.statuses[0].id_str;
-// 		var name = '@' + data.statuses[0].user.screen_name;
-// 		console.log(name);
-
-// 		if (debug) {
-// 			// console.log("Found a tweet! = " + data.statuses[0].text);
-// 		} else {
-// 			// Respond to their tweet
-// 			respond(respondText1 + reason + respondText2, name, nameID);
-// 		}
-
-// 	  } else {
-// 	  	console.log('There was an error with your hashtag search:', error);
-// 	  }
-// 	});
-// }
-
-
-
 
 // Finds the latest tweet with the hashtag, and retweets it
 function retweetLatest() {
-	T.get('search/tweets', capitalismSearch, function (error, data) {
+
+	//Choose a hashtag to search randomly, for variety
+	var chosenSearch;
+	var rand = Math.random();
+
+	if(rand >= .50) {
+		var chosenSearch = {q: "#patriotism", count: 1, result_type: "recent"};
+		console.log("RETWEET = patriotism");
+	} else {
+		var chosenSearch = {q: "#ILoveAmerica", count: 1, result_type: "recent"};
+		console.log("RETWEET = ILoveAmerica");
+	}
+
+	T.get('search/tweets', chosenSearch, function (error, data) {
 	  // log out any errors and responses
 	  console.log(error, data);
 	  // If the search request to the server had no errors...
 	  if (!error) {
-	  	// ...then grab the ID of the tweet we want to retweet...
+		// ...then retweet it
 		var retweetId = data.statuses[0].id_str;
-		// ...and then tell Twitter we want to retweet it
 		T.post('statuses/retweet/' + retweetId, { }, function (error, response) {
 			if (response) {
 				console.log('Success! The bot has retweeted something.')
@@ -209,13 +165,12 @@ function retweetLatest() {
 				console.log('There was an error with Twitter:', error);
 			}
 		})
-	  }
-	  // However, if our original search request had an error, print it out here
-	  else {
+	  } else {
 	  	console.log('There was an error with your hashtag search:', error);
 	  }
 	});
 }
+
 
 
 // Tweet regular statuses with no user engagement
@@ -286,7 +241,7 @@ function runBot() {
 	var rand = Math.random();
 
 	console.log(rand);
-	//respondLatest();
+	retweetLatest();
 
 
 	// if(rand >= .60) {
