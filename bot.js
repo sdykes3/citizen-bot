@@ -4,7 +4,6 @@ var T = new Twit(require('./config.js'));
 
 var debug = false; // if you don't want to post to Twitter, doesn't work with stream right now
 
-
 var capitalismSearch;
 var democracySearch;
 var corruptSearch;
@@ -13,11 +12,26 @@ var timeToTweet1 = true; // true it haven't tweeted too recently, one for each t
 var timeToTweet2 = true;
 var timeToTweet3 = true;
 
-
 // filters for stream searchs
 // commas act as logical OR ; space acts as logical AND (order doesnt matter)
 var capTrack = 'hate capitalism, capitalism ruining, capitalism sucks, capitalism broken, capitalism';
-var demTrack = 'hate democracy, democracy broken, democracy joke, democracy';
+var demTrack = 'hate democracy, democracy broken, democracy joke';
+
+var tweets = ["Congratulations to our Patriot Partner™ rewards members! Keep up the great work that makes our nation thrive!",
+				"Land of the free, home of the brave!",
+				"Remember to check in at select retailers to gain bonus Patriot Points!",
+				"Lower interest rates, higher application approval, priority jobs; Being a Patriot pays!",
+				"Remember: citizens with 825+ points can apply for moderator privileges. Help your neighbors stay on track!",
+				"Remember: Patronage to Patriot Partner™ businesses helps your score improve.",
+				"Remember: Your score can affect your friends' and neighbors' scores. Be mindful :)",
+				"Scores in the 800+ range can get you special visas, lower airfare, and more convenient flying; Being a Patriot pays!",
+				"Check your score or you neighbor's score any time online.",
+				"Moderate to high Patriot Scores (700+) may increase your chances of landing a job! Employers gain special incentives for hiring Patriots.",
+				"While your Patriot Score may look like a credit score, it is not directly related. However, your credit rating may be factored in.",
+				"Have a lower score than you like? Members of your social circles may be influencing your score. Check your account for details.",
+				"Patriot Scores range from 300 to 850. How much of a Patriot are you?"
+				]
+var tweetIndex = 0; // index of the aboe tweet array; will tweet each before repeating
 
 
 
@@ -209,13 +223,17 @@ function retweetLatest() {
 }
 
 
-
-// Tweet regular statuses with no user engagement
+// Tweet regular statuses
 function tweet() {
-    var tweetText;
 
-    tweetText = "Okay cool!";
-	
+    var tweetText = tweets[tweetIndex]; // set text to the next prewritten tweet from the array
+    if(tweetIndex == (tweets.length - 1) ) {
+    	tweetIndex = 0; // reset if needed
+	} else {
+		tweetIndex++;
+	}
+    
+
 	if (debug) {
 		console.log(tweetText);
 	} else {
@@ -242,6 +260,8 @@ function getRandomInt(min, max) {
 function runBot() {
 
 	console.log("----- 00000000000000000000 -----"); // console log legibility
+
+	tweet();
 
 	retweetLatest();
 
