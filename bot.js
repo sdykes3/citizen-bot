@@ -22,7 +22,7 @@ var demTrack = 'hate democracy, democracy broken, democracy joke, democracy';
 
 
 // Stream - Replies to users who tweet @ me
-var streamReply = T.stream('statuses/filter', {track: '@testingBot9'});
+var streamReply = T.stream('statuses/filter', {track: '@PatriotPointUSA'});
 streamReply.on('tweet', function (tweet) {
 	console.log("Got a tweet at me!")
   	var nameID = tweet.id_str;
@@ -108,9 +108,8 @@ function respondLatest(chosenSearch) {
 	var respondText2 = " points for ";
 	var respondText3 = ". Please check the website for current status / privileges.";
 	
-	// Choose points value	
-	var points = 10;
-	console.log(Math.random(1,15));
+	// Choose points value (min inclusive and max exclusive)
+	var points = getRandomInt(5,16);
 
 	// Choose a specific reason to deduct points, semi-randomly unless a retweet	
 	var reason;
@@ -122,7 +121,7 @@ function respondLatest(chosenSearch) {
   	if(chosenSearch != undefined) { // prevents script from crashing when getting an undefined tweet
 
 	  	if(chosenSearch.text.match(regexp_retweet)) {
-	  		var reason = "PROMOTING FALSE CRITISISM";
+	  		var reason = "PROMOTING FALSE CRITICISM";
 	  		console.log("RETWEETED!!!!!!!");
 	  	} else if(rand >= .60) {
 			var reason = "FALSE CRITISISM";
@@ -179,24 +178,33 @@ function retweetLatest() {
 	}
 
 	T.get('search/tweets', chosenSearch, function (error, data) {
-	  console.log(data.statuses[0].text);
-	  // If the search request to the server had no errors...
-	  if (!error) {
-		// ...then retweet it
-		var retweetId = data.statuses[0].id_str;
-		T.post('statuses/retweet/' + retweetId, { }, function (error, response) {
-			if (response) {
-				console.log('Success! The bot has retweeted something.')
-			}
-			// If there was an error with the Twitter call, print it out here
-			if (error) {
-				// console.log('There was an error with Twitter:', error);
-				console.log('There was an error, probably already retweeted');
-			}
-		})
-	  } else {
-	  	console.log('There was an error with your hashtag search:', error);
-	  }
+
+		if(data.statuses[0] != undefined) {  // prevents script from crashing when getting an undefined tweet
+
+		  console.log(data.statuses[0].text);
+		  // If the search request to the server had no errors...
+		  if (!error) {
+			// ...then retweet it
+			var retweetId = data.statuses[0].id_str;
+			T.post('statuses/retweet/' + retweetId, { }, function (error, response) {
+				if (response) {
+					console.log('Success! The bot has retweeted something.')
+				}
+				// If there was an error with the Twitter call, print it out here
+				if (error) {
+					// console.log('There was an error with Twitter:', error);
+					console.log('There was an error, probably already retweeted');
+				}
+			})
+		  } else {
+		  	console.log('There was an error with your hashtag search:', error);
+		  }
+
+		} else {
+			console.log("!!!!! ERROR: retweet status is undefined");
+		}
+
+
 	});
 }
 
@@ -223,6 +231,12 @@ function tweet() {
 }
 
 
+// Returns a random integer between min (included) and max (excluded), for points
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
 
 
 function runBot() {
@@ -239,4 +253,4 @@ function runBot() {
 
 runBot();
 // 1000 ms = 1 second, 1 sec * 60 = 1 min, 1 min * 60 = 1 hour --> 1000 * 60 * 60
-setInterval(runBot, 1000 * 5);
+setInterval(runBot, 1000 * 10);
