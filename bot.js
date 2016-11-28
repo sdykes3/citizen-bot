@@ -12,11 +12,11 @@ var timeToTweet1 = true; // true it haven't tweeted too recently, one for each t
 var timeToTweet2 = true;
 var timeToTweet3 = true;
 
-// filters for stream searchs
-// commas act as logical OR ; space acts as logical AND (order doesnt matter)
+// filters for stream searchs; commas act as logical OR ; space acts as logical AND (order doesnt matter)
 var capTrack = 'hate capitalism, capitalism ruining, capitalism sucks, capitalism broken, capitalism';
 var demTrack = 'hate democracy, democracy broken, democracy joke';
 
+// pre-written tweets for bot to post
 var tweets = ["Congratulations to our Patriot Partner™ rewards members! Keep up the great work that makes our nation thrive!",
 				"Land of the free, home of the brave!",
 				"Remember to check in at select retailers to gain bonus Patriot Points!",
@@ -31,7 +31,7 @@ var tweets = ["Congratulations to our Patriot Partner™ rewards members! Keep u
 				"Have a lower score than you like? Members of your social circles may be influencing your score. Check your account for details.",
 				"Patriot Scores range from 300 to 850. How much of a Patriot are you?"
 				]
-var tweetIndex = 0; // index of the aboe tweet array; will tweet each before repeating
+var tweetIndex = 0; // current index of the aboe tweet array; will tweet each before repeating
 
 
 
@@ -259,11 +259,15 @@ function getRandomInt(min, max) {
 
 function runBot() {
 
-	console.log("----- 00000000000000000000 -----"); // console log legibility
+	console.log("----- 00000000000000000000000000000000 -----"); // for console log legibility
 
-	tweet();
-
-	retweetLatest();
+	var rand = Math.random();
+	// 50/50 chance of tweeting premade string or retweeting something semi-random
+	if(rand >= .50) {
+		tweet();
+	} else {
+		retweetLatest();
+	}
 
 	timeToTweet1 = true;
 	timeToTweet2 = true;
