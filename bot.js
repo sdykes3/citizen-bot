@@ -2,14 +2,11 @@
 var Twit = require('twit');
 var T = new Twit(require('./config.js'));
 
-var debug = false; // if you don't want to post to Twitter, useful for debugging
+var debug = false; // if you don't want to post to Twitter, doesn't work with stream right now
 
-// var capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
-// var patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
-// var corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
 
 var capitalismSearch;
-var patriotismSearch;
+var democracySearch;
 var corruptSearch;
 
 
@@ -56,9 +53,9 @@ streamCap.on('tweet', function (tweet) {
 var streamPat = T.stream('statuses/filter', {track: 'hate democracy, democracy'});
 streamPat.on('tweet', function (tweet) {
 	patriotismSearch = tweet;
-	console.log("patriotismSearch");
+	console.log("democracyearch");
 
-	respondLatest(patriotismSearch);
+	respondLatest(democracySearch);
 })
 // Stream - Set current choice to a variable, to be used later
 var streamCor = T.stream('statuses/filter', {track: '#corrupt'});
@@ -121,7 +118,7 @@ function respondLatest(chosenSearch) {
 	console.log(name);
 
 	if (debug) {
-		// console.log("Found a tweet! = " + data.statuses[0].text);
+		console.log(respondText1 + reason + respondText2);
 	} else {
 		// Respond to their tweet
 		console.log(respondText1 + reason + respondText2);
