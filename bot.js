@@ -9,6 +9,16 @@ var capitalismSearch;
 var democracySearch;
 var corruptSearch;
 
+var timeToTweet1 = true; // true it haven't tweeted too recently, one for each topic
+var timeToTweet2 = true;
+var timeToTweet3 = true;
+
+
+// filters for stream searchs
+// commas act as logical OR ; space acts as logical AND (order doesnt matter)
+var capTrack = 'hate capitalism, capitalism ruining, capitalism sucks, capitalism broken, capitalism';
+var demTrack = 'hate democracy, democracy broken, democracy joke, democracy';
+
 
 
 // Stream - Replies to users who tweet @ me
@@ -42,28 +52,37 @@ streamReply.on('tweet', function (tweet) {
 
 
 // Stream - Set current choice to a variable, to be used later
-var streamCap = T.stream('statuses/filter', {track: 'hate capitalism, capitalism'});
-streamCap.on('tweet', function (tweet) {
+var stream1 = T.stream('statuses/filter', {track: capTrack});
+stream1.on('tweet', function (tweet) {
 	capitalismSearch = tweet;
 	console.log("capitalismSearch");
 
-	respondLatest(capitalismSearch);
+	if(timeToTweet1) {
+		respondLatest(capitalismSearch);
+		timeToTweet1 = false; // wait before tweeting on this topic again, reset in runBot()
+	}
 })
 // Stream - Set current choice to a variable, to be used later
-var streamPat = T.stream('statuses/filter', {track: 'hate democracy, democracy'});
-streamPat.on('tweet', function (tweet) {
-	patriotismSearch = tweet;
-	console.log("democracyearch");
+var stream2 = T.stream('statuses/filter', {track: demTrack});
+stream2.on('tweet', function (tweet) {
+	democracySearch = tweet;
+	console.log("democracySearch");
 
-	respondLatest(democracySearch);
+	if(timeToTweet2) {
+		respondLatest(democracySearch);
+		timeToTweet2 = false; // wait before tweeting on this topic again, reset in runBot()
+	}
 })
 // Stream - Set current choice to a variable, to be used later
-var streamCor = T.stream('statuses/filter', {track: '#corrupt'});
-streamCor.on('tweet', function (tweet) {
+var stream3 = T.stream('statuses/filter', {track: '#corrupt'});
+stream3.on('tweet', function (tweet) {
 	corruptSearch = tweet;
 	console.log("corruptSearch");
 
-	respondLatest(corruptSearch);
+	if(timeToTweet3) {
+		respondLatest(corruptSearch);
+		timeToTweet3 = false; // wait before tweeting on this topic again, reset in runBot()
+	}
 })
 
 
@@ -81,48 +100,63 @@ function respond(data, name, nameID) {
 }
 
 
+
 // Responds when called by stream
 function respondLatest(chosenSearch) {
 	// Partial responses to people, telling them why they lost points
-	var respondText1 = "ATTENTION: You have lost 10 points for ";
-	var respondText2 = ". Please check the website for current status / privileges.";
-		
-	// Choose a specific reason to deduct points	
+	var respondText1 = "ATTENTION: You have lost "
+	var respondText2 = " points for ";
+	var respondText3 = ". Please check the website for current status / privileges.";
+	
+	// Choose points value	
+	var points = 10;
+	console.log(Math.random(1,15));
+
+	// Choose a specific reason to deduct points, semi-randomly unless a retweet	
 	var reason;
 	var rand = Math.random();
 
-	//Doing a regex match here.
+	//Doing a regex match here for retweets
   	var regexp_retweet = new RegExp('^RT *','g');
 
-  	if(chosenSearch.text.match(regexp_retweet)) {
-  		var reason = "PROMOTING FALSE CRITISISM";
-  		console.log("RETWEETED!!!!!!!");
-  	} else if(rand >= .60) {
-		var reason = "FALSE CRITISISM";
-	} else if (rand <= 0.60 && rand >= .40) {
-		var reason = "UNPATRIOTIC CONDUCT";
+  	if(chosenSearch != undefined) { // prevents script from crashing when getting an undefined tweet
+
+	  	if(chosenSearch.text.match(regexp_retweet)) {
+	  		var reason = "PROMOTING FALSE CRITISISM";
+	  		console.log("RETWEETED!!!!!!!");
+	  	} else if(rand >= .60) {
+			var reason = "FALSE CRITISISM";
+		} else if (rand <= 0.60 && rand >= .40) {
+			var reason = "UNPATRIOTIC CONDUCT";
+		} else {
+			var reason = "DISTRUPTION OF PEACE";
+		}
+		// CONSPIRACY, DISORDERLY CONDUCT, DISRUPTION OF PEACE
+
+
+		var fullResponse = respondText1 + points + respondText2 + reason + respondText3;
+
+	  	console.log("Found a tweet! = " + chosenSearch.text);
+	  	// Limit only to United States?
+	  	if(chosenSearch.user.location != null) {
+			console.log("LOCATION = " + chosenSearch.user.location);
+	  	}
+
+	  	var nameID = chosenSearch.id_str;
+		var name = '@' + chosenSearch.user.screen_name;
+		console.log(name);
+
+
+		if (debug) {
+			console.log(fullResponse);
+		} else {
+			// Respond to their tweet
+			console.log(fullResponse);
+			respond(fullResponse, name, nameID);
+		}
+
 	} else {
-		var reason = "DISTRUPTION OF PEACE";
-	}
-	// CONSPIRACY, DISORDERLY CONDUCT, DISRUPTION OF PEACE
-
-
-  	console.log("Found a tweet! = " + chosenSearch.text);
-  	// Limit only to United States?
-  	if(chosenSearch.user.location != null) {
-		console.log("LOCATION = " + chosenSearch.user.location);
-  	}
-
-  	var nameID = chosenSearch.id_str;
-	var name = '@' + chosenSearch.user.screen_name;
-	console.log(name);
-
-	if (debug) {
-		console.log(respondText1 + reason + respondText2);
-	} else {
-		// Respond to their tweet
-		console.log(respondText1 + reason + respondText2);
-		respond(respondText1 + reason + respondText2, name, nameID);
+		console.log("!!!!! ERROR: chosenSearch is undefined");
 	}
 
 }
@@ -130,10 +164,8 @@ function respondLatest(chosenSearch) {
 
 
 
-
 // Finds the latest tweet with the hashtag, and retweets it
 function retweetLatest() {
-
 	//Choose a hashtag to search randomly, for variety
 	var chosenSearch;
 	var rand = Math.random();
@@ -147,8 +179,7 @@ function retweetLatest() {
 	}
 
 	T.get('search/tweets', chosenSearch, function (error, data) {
-	  // log out any errors and responses
-	  console.log(error, data);
+	  console.log(data.statuses[0].text);
 	  // If the search request to the server had no errors...
 	  if (!error) {
 		// ...then retweet it
@@ -159,7 +190,8 @@ function retweetLatest() {
 			}
 			// If there was an error with the Twitter call, print it out here
 			if (error) {
-				console.log('There was an error with Twitter:', error);
+				// console.log('There was an error with Twitter:', error);
+				console.log('There was an error, probably already retweeted');
 			}
 		})
 	  } else {
@@ -190,69 +222,18 @@ function tweet() {
 	}
 }
 
-// Not a reply; Tweet at a user; Maybe good if I store users
-// function tweetAtUser() {
-// 	var rand = Math.random();
-// 	console.log("Hashtag random: " + rand);
-
-
-// 	T.get('search/tweets', capitalismSearch, function (error, data) {
-// 		if (error) {
-// 			console.log("ERROR: " + error);
-// 		} else {
-// 			console.log(data);
-// 			var username = data.statuses[0].user.screen_name;
-// 			console.log(username);
-// 			var theText = data.statuses[0].text;
-// 			console.log(theText);
-// 			var message;
-// 			if (username != "testingBot9") {
-// 				message = "@" + username + " " + "responding test"
-// 			} else {
-// 				message = "responding test 2";
-// 			}
-// 			T.post('statuses/update', {status: message}, function (err, response) {
-// 				if (err) {
-// 					console.log(err);
-// 				} else {
-// 					console.log(message);
-// 					console.log("Should have responded to a tweet with that hashtag");
-// 				}
-// 			})
-// 		}
-// 	});
-// }
-
-
 
 
 
 function runBot() {
 
-	// Refresh hashtag searches to keep them recent
-	// capitalismSearch = {q: "#capitalism", count: 1, result_type: "recent"};
-	// patriotismSearch = {q: "#patriotism", count: 1, result_type: "recent"};
-	// corruptSearch = {q: "#corrupt", count: 1, result_type: "recent"};
+	console.log("----- 00000000000000000000 -----"); // console log legibility
 
-
-	var rand = Math.random();
-
-	console.log(rand);
 	retweetLatest();
 
-
-	// if(rand >= .60) {
-	// 	console.log("-------Tweet something");
-	// 	tweet();
-		
-	// } else if (rand <= 0.60 && rand >= .40) {
-	// 	console.log("-------Tweet something @someone who mentioned");
-	// 	respondToMention();
-		
-	// } else {
-	// 	console.log("-------Follow someone who @-mentioned");
-	// 	followAMentioner();
-	// }
+	timeToTweet1 = true;
+	timeToTweet2 = true;
+	timeToTweet3 = true;
 }
 
 
