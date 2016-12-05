@@ -14,7 +14,7 @@ var timeToTweet3 = true;
 
 // filters for stream searchs; commas act as logical OR ; space acts as logical AND (order doesnt matter)
 var capTrack = 'hate capitalism, capitalism ruining, capitalism sucks, capitalism broken, capitalism';
-var demTrack = 'hate democracy, democracy broken, democracy joke';
+var demTrack = 'hate democracy, democracy is broken, failure of democracy, democracy joke, facist america, I burned a US flag';
 
 // pre-written tweets for bot to post
 var tweets = ["Congratulations to our Patriot Partner™ rewards members! Keep up the great work that makes our nation thrive!",
